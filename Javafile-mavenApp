@@ -1,0 +1,32 @@
+def gv
+
+pipeline {
+    agent any
+    tools {
+        maven 'maven'
+    }
+    stages {
+        stage("build jar") {
+            steps {
+                echo "building jar"
+                sh 'mvn package'
+            }
+        }
+        stage("build image") {
+            steps {
+                script {
+                    echo "building image"
+                    withCredentials([usernamePassword(credentialsId: 'Docker-Hub', passwordVariable: 'PASS', usernameVariable: 'USER')])
+                        sh 'docker build -t OShireO/java-maven-app:mvn-1.0'
+                        sh 'echo $PASS | docker login -u $USER --password-stdin'
+                        sh 'docker push OShireO/java-maven-app:mvn-1.0'
+                    }
+                }
+            }
+        stage("deploy") {
+            steps {
+                
+            }
+        }
+    }   
+}
